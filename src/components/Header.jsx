@@ -4,7 +4,9 @@ import { connect } from 'react-redux';
 
 class Header extends React.Component {
   render() {
-    const { userName, avatar, score } = this.props;
+    const { userName, avatar } = this.props;
+    const playerLocalStorage = JSON.parse(localStorage.getItem('state'));
+    const { score } = playerLocalStorage.player;
 
     return (
       <header>
@@ -24,7 +26,6 @@ class Header extends React.Component {
 Header.propTypes = {
   userName: PropTypes.string.isRequired,
   avatar: PropTypes.string.isRequired,
-  score: PropTypes.number.isRequired,
 };
 
 const mapStateToProps = (globalState) => ({
