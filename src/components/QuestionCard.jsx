@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import QuestionInfo from './QuestionInfo';
 import Header from './Header';
 
-class QuestionCard extends React.Component {
+export default class QuestionCard extends React.Component {
   constructor() {
     super();
     this.state = {
@@ -29,6 +29,9 @@ class QuestionCard extends React.Component {
     this.setColorAndScore = this.setColorAndScore.bind(this);
     this.countdown = this.countdown.bind(this);
     this.getIDFromSetInterval = this.getIDFromSetInterval.bind(this);
+    this.listAnswersMultiple = this.listAnswersMultiple.bind(this);
+    this.buttonRedirect = this.buttonRedirect.bind(this);
+    this.submitAnswer = this.submitAnswer.bind(this);
   }
 
   componentDidMount() {
@@ -46,9 +49,7 @@ class QuestionCard extends React.Component {
     const ONE_SECOND = 1000;
     const intervalID = setInterval(this.countdown, ONE_SECOND);
 
-    this.setState({
-      intervalID,
-    });
+    this.setState({ intervalID });
   }
 
   setColorAndScore() {
@@ -63,7 +64,6 @@ class QuestionCard extends React.Component {
     });
   }
 
-  // Timer requisito 08
   countdown() {
     const { countdown, intervalID } = this.state;
 
@@ -71,9 +71,7 @@ class QuestionCard extends React.Component {
       clearInterval(intervalID);
       this.setState({ isDisabled: true });
     } else {
-      this.setState({
-        countdown: countdown - 1,
-      });
+      this.setState({ countdown: countdown - 1 });
     }
   }
 
@@ -152,7 +150,8 @@ class QuestionCard extends React.Component {
   }
 
   submitAnswer(boolean) {
-    const { stateToLocalStorage, countdown, difficulty } = this.state;
+    const { stateToLocalStorage: { player: { score } },
+      countdown, difficulty } = this.state;
     const BASE_SCORE = 10;
     const HARD = 3;
     const MEDIUM = 2;
@@ -178,24 +177,25 @@ class QuestionCard extends React.Component {
       this.setState({
         stateToLocalStorage: {
           player: {
-            score: stateToLocalStorage.player.score
+            name: '',
+            assertions: 0,
+            score: score
             + BASE_SCORE + (countdown * numberOfDifficulty),
+            gravatarEmail: '',
           },
         },
-      }, localStorage.setItem('state', JSON.stringify(stateToLocalStorage)));
+      }, () => {
+        const { stateToLocalStorage } = this.state;
+        localStorage.setItem('state', JSON.stringify(stateToLocalStorage));
+      });
     }
   }
 
   render() {
     const { apiResult } = this.props;
-    const {
-      questionIndex,
-      answerListState,
-      correctAnswerC,
-      wrongAnswerC,
-      countdown,
-      isDisabled,
-    } = this.state;
+    const { questionIndex, answerListState, correctAnswerC, wrongAnswerC,
+      countdown, isDisabled } = this.state;
+
     const { score } = JSON.parse(localStorage.getItem('state')).player;
 
     return (
@@ -244,5 +244,3 @@ QuestionCard.propTypes = {
     question: PropTypes.string,
   }).isRequired,
 };
-
-export default QuestionCard;
