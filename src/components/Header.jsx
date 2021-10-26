@@ -8,6 +8,7 @@ class Header extends React.Component {
     const playerLocalStorage = JSON.parse(localStorage.getItem('state'));
     const { score } = playerLocalStorage.player;
 
+
     return (
       <header>
         {/* Avatar do Jogador */}

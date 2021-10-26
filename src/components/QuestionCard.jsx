@@ -94,7 +94,6 @@ class QuestionCard extends React.Component {
       difficulty: apiResult[questionIndex].difficulty,
     };
     const answerList = [...incorrectAnswersList, correctAnswer];
-    console.log(answerList);
 
     // https://flaviocopes.com/how-to-shuffle-array-javascript/
     const number = 0.5;
