@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import QuestionInfo from './QuestionInfo';
+import Header from './Header';
 
 class QuestionCard extends React.Component {
   constructor() {
@@ -103,14 +104,13 @@ class QuestionCard extends React.Component {
   }
 
   nextQuestion() {
-    const { questionIndex, stateToLocalStorage, intervalID } = this.state;
+    const { questionIndex, intervalID } = this.state;
     this.setState({
       questionIndex: questionIndex + 1,
       wrongAnswerC: 'answer',
       correctAnswerC: 'answer',
       showbutton: false,
     }, () => this.listAnswersMultiple());
-    localStorage.setItem('state', JSON.stringify(stateToLocalStorage));
 
     clearInterval(intervalID);
     this.getIDFromSetInterval();
@@ -182,7 +182,7 @@ class QuestionCard extends React.Component {
             + BASE_SCORE + (countdown * numberOfDifficulty),
           },
         },
-      });
+      }, localStorage.setItem('state', JSON.stringify(stateToLocalStorage)));
     }
   }
 
@@ -196,8 +196,11 @@ class QuestionCard extends React.Component {
       countdown,
       isDisabled,
     } = this.state;
+    const { score } = JSON.parse(localStorage.getItem('state')).player;
+
     return (
       <section className="question-card">
+        <Header scoreToHeader={ score } />
         <QuestionInfo apiResult={ apiResult } questionIndex={ questionIndex } />
         {answerListState.map((question, index) => (
           question.value === true
