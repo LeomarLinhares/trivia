@@ -2,8 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import QuestionInfo from './QuestionInfo';
+import Header from './Header';
 
-class QuestionCard extends React.Component {
+export default class QuestionCard extends React.Component {
   constructor() {
     super();
     this.state = {
@@ -20,15 +21,35 @@ class QuestionCard extends React.Component {
       correctAnswerC: 'answer', // State referente a Classe das respostas
       wrongAnswerC: 'answer', // State referente a Classe das respostas
       showbutton: false,
+      countdown: 30,
+      isDisabled: false,
     };
 
     this.nextQuestion = this.nextQuestion.bind(this);
     this.setColorAndScore = this.setColorAndScore.bind(this);
+    this.countdown = this.countdown.bind(this);
+    this.getIDFromSetInterval = this.getIDFromSetInterval.bind(this);
+    this.listAnswersMultiple = this.listAnswersMultiple.bind(this);
+    this.buttonRedirect = this.buttonRedirect.bind(this);
+    this.submitAnswer = this.submitAnswer.bind(this);
   }
 
   componentDidMount() {
     const { questionIndex } = this.state;
     this.listAnswersMultiple(questionIndex);
+    this.getIDFromSetInterval();
+  }
+
+  componentWillUnmount() {
+    const { intervalID } = this.state;
+    clearInterval(intervalID);
+  }
+
+  getIDFromSetInterval() {
+    const ONE_SECOND = 1000;
+    const intervalID = setInterval(this.countdown, ONE_SECOND);
+
+    this.setState({ intervalID });
   }
 
   setColorAndScore() {
@@ -40,10 +61,18 @@ class QuestionCard extends React.Component {
       } else {
         this.setState({ wrongAnswerC: 'answer wrong-answer' });
       }
-      // if (index === parseInt(target.name, 10) && answer.value === true) {
-      //   target.className = 'answer correct-answer';
-      // }
     });
+  }
+
+  countdown() {
+    const { countdown, intervalID } = this.state;
+
+    if (countdown === 0) {
+      clearInterval(intervalID);
+      this.setState({ isDisabled: true });
+    } else {
+      this.setState({ countdown: countdown - 1 });
+    }
   }
 
   listAnswersMultiple() {
@@ -54,31 +83,39 @@ class QuestionCard extends React.Component {
       {
         answer,
         value: false,
+        difficulty: apiResult[questionIndex].difficulty,
       }
     ));
 
     const correctAnswer = {
       answer: apiResult[questionIndex].correct_answer,
       value: true,
+      difficulty: apiResult[questionIndex].difficulty,
     };
     const answerList = [...incorrectAnswersList, correctAnswer];
 
     // https://flaviocopes.com/how-to-shuffle-array-javascript/
     const number = 0.5;
     answerList.sort(() => Math.random() - number);
-    this.setState({ answerListState: answerList });
+    this.setState({ answerListState: answerList, difficulty: answerList[0].difficulty });
     return answerList;
   }
 
   nextQuestion() {
-    const { questionIndex, stateToLocalStorage } = this.state;
+    const { questionIndex, intervalID } = this.state;
     this.setState({
       questionIndex: questionIndex + 1,
       wrongAnswerC: 'answer',
       correctAnswerC: 'answer',
       showbutton: false,
     }, () => this.listAnswersMultiple());
-    localStorage.setItem('state', JSON.stringify(stateToLocalStorage));
+
+    clearInterval(intervalID);
+    this.getIDFromSetInterval();
+    this.setState({
+      countdown: 30,
+      isDisabled: false,
+    });
   }
 
   buttonRedirect() {
@@ -113,28 +150,58 @@ class QuestionCard extends React.Component {
   }
 
   submitAnswer(boolean) {
-    const { stateToLocalStorage } = this.state;
+    const { stateToLocalStorage: { player: { score } },
+      countdown, difficulty } = this.state;
+    const BASE_SCORE = 10;
+    const HARD = 3;
+    const MEDIUM = 2;
+    const EASY = 1;
+    let numberOfDifficulty = 0;
+
+    switch (difficulty) {
+    case 'hard':
+      numberOfDifficulty = HARD;
+      break;
+    case 'medium':
+      numberOfDifficulty = MEDIUM;
+      break;
+    case 'easy':
+      numberOfDifficulty = EASY;
+      break;
+    default:
+      numberOfDifficulty = 0;
+      break;
+    }
+
     if (boolean) {
       this.setState({
         stateToLocalStorage: {
           player: {
-            score: stateToLocalStorage.player.score + 1,
+            name: '',
+            assertions: 0,
+            score: score
+            + BASE_SCORE + (countdown * numberOfDifficulty),
+            gravatarEmail: '',
           },
         },
+      }, () => {
+        const { stateToLocalStorage } = this.state;
+        localStorage.setItem('state', JSON.stringify(stateToLocalStorage));
       });
     }
   }
 
   render() {
     const { apiResult } = this.props;
-    const {
-      questionIndex,
-      answerListState,
-      correctAnswerC,
-      wrongAnswerC,
-    } = this.state;
+    const { questionIndex, answerListState, correctAnswerC, wrongAnswerC,
+      countdown, isDisabled } = this.state;
+
+    const { score } = JSON.parse(localStorage.getItem('state')).player;
+    console.log(`questioncard: ${score}`);
+
     return (
       <section className="question-card">
+        <Header scoreToHeader={ score } />
         <QuestionInfo apiResult={ apiResult } questionIndex={ questionIndex } />
         {answerListState.map((question, index) => (
           question.value === true
@@ -146,6 +213,7 @@ class QuestionCard extends React.Component {
                 data-testid="correct-answer"
                 className={ correctAnswerC }
                 name={ index }
+                disabled={ isDisabled }
               >
                 { question.answer }
               </button>)
@@ -157,11 +225,13 @@ class QuestionCard extends React.Component {
                 data-testid={ `wrong-answer-${index}` }
                 className={ wrongAnswerC }
                 name={ index }
+                disabled={ isDisabled }
               >
                 { question.answer }
               </button>)
         ))}
         { this.buttonRedirect() }
+        <span>{ countdown }</span>
       </section>
     );
   }
@@ -175,5 +245,3 @@ QuestionCard.propTypes = {
     question: PropTypes.string,
   }).isRequired,
 };
-
-export default QuestionCard;

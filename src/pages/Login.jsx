@@ -21,6 +21,18 @@ class Login extends React.Component {
     };
   }
 
+  componentDidMount() {
+    const stateToLocalStorage = {
+      player: {
+        name: '',
+        assertions: 0,
+        score: 0,
+        gravatarEmail: '',
+      },
+    };
+    localStorage.setItem('state', JSON.stringify(stateToLocalStorage));
+  }
+
   // Função que seta as informações do usuário (nome, avatar, e score)
   setUserInfo() {
     const { playerName, playerEmail } = this.state;
