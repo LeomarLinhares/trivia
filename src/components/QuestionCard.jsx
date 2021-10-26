@@ -150,7 +150,7 @@ export default class QuestionCard extends React.Component {
   }
 
   submitAnswer(boolean) {
-    const { stateToLocalStorage: { player: { score } },
+    const { stateToLocalStorage: { player: { score, assertions } },
       countdown, difficulty } = this.state;
     const BASE_SCORE = 10;
     const HARD = 3;
@@ -178,7 +178,7 @@ export default class QuestionCard extends React.Component {
         stateToLocalStorage: {
           player: {
             name: '',
-            assertions: 0,
+            assertions: assertions + 1,
             score: score
             + BASE_SCORE + (countdown * numberOfDifficulty),
             gravatarEmail: '',
@@ -197,7 +197,6 @@ export default class QuestionCard extends React.Component {
       countdown, isDisabled } = this.state;
 
     const { score } = JSON.parse(localStorage.getItem('state')).player;
-    console.log(`questioncard: ${score}`);
 
     return (
       <section className="question-card">

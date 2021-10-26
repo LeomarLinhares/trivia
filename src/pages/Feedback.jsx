@@ -3,14 +3,30 @@ import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 
 class Feedback extends React.Component {
+  constructor() {
+    super();
+
+    this.feedbackText = this.feedbackText.bind(this);
+  }
+
+  feedbackText() {
+    const LESS_THAN_THREE_HITS = 3;
+    const { assertions } = JSON.parse(localStorage.getItem('state')).player;
+
+    if (assertions < LESS_THAN_THREE_HITS) {
+      return 'Podia ser melhor...';
+    }
+    return 'Mandou bem!';
+  }
+
   render() {
     const { score } = JSON.parse(localStorage.getItem('state')).player;
 
     return (
       <div>
-        <h1 data-testid="feedback-text">
-          Feedback
-        </h1>
+        <h3 data-testid="feedback-text">
+          { this.feedbackText() }
+        </h3>
         <Header scoreToHeader={ score } />
         <Link to="/">
           <button type="button" data-testid="btn-play-again">
