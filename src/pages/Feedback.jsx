@@ -21,6 +21,7 @@ class Feedback extends React.Component {
 
   render() {
     const { score } = JSON.parse(localStorage.getItem('state')).player;
+    const { assertions } = JSON.parse(localStorage.getItem('state')).player;
 
     return (
       <div>
@@ -28,6 +29,12 @@ class Feedback extends React.Component {
           { this.feedbackText() }
         </h3>
         <Header scoreToHeader={ score } />
+
+        {/* score total do jogador */}
+        <span data-testid="feedback-total-score">{ score }</span>
+
+        {/* quantidade de perguntas acertadas */}
+        <span data-testid="feedback-total-question">{ assertions }</span>
         <Link to="/">
           <button type="button" data-testid="btn-play-again">
             Jogar novamente
