@@ -197,6 +197,7 @@ export default class QuestionCard extends React.Component {
       countdown, isDisabled } = this.state;
 
     const { score } = JSON.parse(localStorage.getItem('state')).player;
+    console.log(`questioncard: ${score}`);
 
     return (
       <section className="question-card">
