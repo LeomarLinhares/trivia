@@ -5,7 +5,6 @@ import { connect } from 'react-redux';
 class Header extends React.Component {
   render() {
     const { userName, avatar, scoreToHeader } = this.props;
-    console.log(scoreToHeader);
 
     return (
       <header>
