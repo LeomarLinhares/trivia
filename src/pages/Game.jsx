@@ -25,6 +25,7 @@ class Game extends React.Component {
 
   render() {
     const { questions, loading } = this.props;
+
     if (loading) return 'Loading...';
     return (
       <div className="game-page">
